@@ -21,6 +21,6 @@ ehthumbs.db
 Thumbs.db
 
 # Simulation Outputs
-results/**/*.npz
+results/
 src/video_generation/videos/*.mp4
 src/video_generation/videos/*.gif
