@@ -18,6 +18,9 @@ import config
 
 # Helper function to dynamically load modules
 def _load_module(module_name, file_path):
+    """
+    Loads a Python module from a given file path.
+    """
     spec = importlib.util.spec_from_file_location(module_name, file_path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
@@ -49,6 +52,9 @@ SAMPLE_EVERY_3D = 10
 
 # Encode cell states to integer codes (1: Proliferating, 2: Quiescent, 3: Necrotic/Apoptotic, 0: Empty)
 def encode_state(state):
+    """
+    Maps string states to integer values for storage.
+    """
     if state == "PROLIFERATING":
         return 1
     if state == "QUIESCENT":
@@ -60,6 +66,9 @@ def encode_state(state):
 
 # Generate a 2D grid matrix of cell states
 def build_cell_matrix_2d(model, width, height):
+    """
+    Creates a 2D numpy array representing the model's grid state.
+    """
     matrix = np.zeros((width, height), dtype=np.int8)
     for cell in model.agents:
         x, y = cell.pos
@@ -69,6 +78,9 @@ def build_cell_matrix_2d(model, width, height):
 
 # Generate a 3D grid matrix of cell states
 def build_cell_matrix_3d(model, width, height, depth):
+    """
+    Creates a 3D numpy array representing the model's grid state.
+    """
     matrix = np.zeros((width, height, depth), dtype=np.int8)
     for cell in model.agents:
         x, y, z = cell.pos
@@ -77,6 +89,9 @@ def build_cell_matrix_3d(model, width, height, depth):
 
 
 def save_plots(df, out_dir, name):
+    """
+    Generates and saves time-series plots for model metrics.
+    """
     if df.empty:
         return
     steps = np.arange(len(df))
@@ -123,6 +138,9 @@ def save_plots(df, out_dir, name):
 
 
 def run_experiment(exp, out_dir, log_every=100):
+    """
+    Executes a single 2D or 3D experiment and saves the output data and plots.
+    """
     history_cells = []
     history_steps = []
     sample_every = exp.get("sample_every", 1)
@@ -182,6 +200,9 @@ def run_experiment(exp, out_dir, log_every=100):
 
 
 def main():
+    """
+    Main entry point for batch simulation runs.
+    """
     experiments = [
         {
             "name": "2D_Normoxia",
