@@ -145,7 +145,7 @@ STEPS_3D = 300       # Number of steps for 3D experiments
 python src/2d/server.py
 ```
 
-Opens a web interface on **http://localhost:8521** with:
+Opens a web interface with:
 - Interactive 2D grid with real-time visualization of cells
 - Population charts (Proliferating, Quiescent, Apoptotic, Necrotic)
 - Metrics charts (Shannon Index, Invasive Distance)
