@@ -9,7 +9,6 @@ from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DEFAULT_REPLAY_PATH = os.path.join(ROOT_DIR, "results", "3d", "3D_Normoxia", "data_3D_Normoxia.npz")
 
-# Colors per state (1=Proliferating, 2=Quiescent, 3=Necrotic)
 COLORS = {
     1: "#DC3232",   # red — proliferating
     2: "#32CD32",   # green — quiescent
@@ -49,7 +48,6 @@ def main():
     indices = list(range(0, total, frame_step))
     x_max, y_max, z_max = cells[0].shape
 
-    # ── Setup figure ────────────────────────────────────────────────
     fig = plt.figure(figsize=(10, 8), facecolor="#0F0F19")
     ax = fig.add_subplot(111, projection="3d", facecolor="#0F0F19")
     ax.set_xlim(0, x_max)
@@ -59,7 +57,6 @@ def main():
     ax.set_ylabel("Y", color="white", fontsize=10)
     ax.set_zlabel("Z", color="white", fontsize=10)
     ax.tick_params(colors="grey", labelsize=7)
-    # Panel backgrounds
     ax.xaxis.pane.fill = False
     ax.yaxis.pane.fill = False
     ax.zaxis.pane.fill = False
@@ -70,9 +67,8 @@ def main():
 
     title = ax.set_title("", color="white", fontsize=13, fontweight="bold", pad=15)
 
-    # Scatter handles — one per state, drawn in the correct order
     scatters = {}
-    for state_id in [3, 2, 1]:  # necrotic behind, proliferating in front
+    for state_id in [3, 2, 1]: 
         sc = ax.scatter([], [], [], c=COLORS[state_id], s=SIZES[state_id],
                         alpha=ALPHAS[state_id], label=LABELS[state_id],
                         edgecolors="none", depthshade=True)
@@ -116,7 +112,6 @@ def main():
     anim = FuncAnimation(fig, update, frames=len(indices),
                          interval=args.interval, blit=False)
 
-    # ── Save ────────────────────────────────────────────────────────
     videos_dir = os.path.join(os.path.dirname(__file__), "videos")
     os.makedirs(videos_dir, exist_ok=True)
     base_name = os.path.splitext(os.path.basename(args.path))[0]
