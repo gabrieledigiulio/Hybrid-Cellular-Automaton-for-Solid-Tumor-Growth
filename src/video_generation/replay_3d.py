@@ -9,6 +9,7 @@ from mpl_toolkits.mplot3d import Axes3D  # noqa: F401
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 DEFAULT_REPLAY_PATH = os.path.join(ROOT_DIR, "results", "3d", "3D_Normoxia", "data_3D_Normoxia.npz")
 
+# Colors per state (1=Proliferating, 2=Quiescent, 3=Necrotic)
 COLORS = {
     1: "#DC3232",   # red — proliferating
     2: "#32CD32",   # green — quiescent
@@ -20,6 +21,10 @@ LABELS = {1: "Proliferating", 2: "Quiescent", 3: "Necrotic"}
 
 
 def main():
+    """
+    Main execution logic for replaying 3D simulation data.
+    Loads .npz files and generates a 3D animation with orbital camera movement.
+    """
     parser = argparse.ArgumentParser(description="Replay 3D simulation from .npz (Matplotlib)")
     parser.add_argument(
         "path", nargs="?", default=DEFAULT_REPLAY_PATH,
@@ -57,6 +62,7 @@ def main():
     ax.set_ylabel("Y", color="white", fontsize=10)
     ax.set_zlabel("Z", color="white", fontsize=10)
     ax.tick_params(colors="grey", labelsize=7)
+    # Panel backgrounds
     ax.xaxis.pane.fill = False
     ax.yaxis.pane.fill = False
     ax.zaxis.pane.fill = False
@@ -67,8 +73,9 @@ def main():
 
     title = ax.set_title("", color="white", fontsize=13, fontweight="bold", pad=15)
 
+    # Scatter handles — one per state, drawn in the correct order
     scatters = {}
-    for state_id in [3, 2, 1]: 
+    for state_id in [3, 2, 1]:  # necrotic behind, proliferating in front
         sc = ax.scatter([], [], [], c=COLORS[state_id], s=SIZES[state_id],
                         alpha=ALPHAS[state_id], label=LABELS[state_id],
                         edgecolors="none", depthshade=True)
@@ -83,6 +90,9 @@ def main():
     total_simulation_steps = steps[-1] if len(steps) > 0 else total
 
     def update(frame_num):
+        """
+        Animation update function that handles camera orbit and data updates.
+        """
         idx = indices[frame_num]
         frame = cells[idx]
         step_val = steps[idx]
