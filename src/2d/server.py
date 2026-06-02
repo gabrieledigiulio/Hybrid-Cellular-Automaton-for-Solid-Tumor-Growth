@@ -10,6 +10,9 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 import config
 
 def agent_portrayal(agent):
+    """
+    Defines how agents are rendered in the 2D grid visualization.
+    """
     portrayal = {"Shape": "rect", "Filled": "true", "w": 1, "h": 1, "Layer": 0}
     if agent.state == "PROLIFERATING":
         portrayal["Color"] = "red"
