@@ -5,7 +5,17 @@ import numpy as np
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 class Microenvironment:
+    """
+    Manages the physical microenvironment including diffusion and boundary conditions.
+    
+    Attributes:
+        oxygen, glucose, h_ions: 2D numpy arrays representing concentrations.
+        D_c, D_g, D_h: Diffusion coefficients.
+    """
     def __init__(self, width, height, oxygen_bg=1.0, glucose_bg=1.0, h_ions_bg=0.0, D_c=0.1, D_g=0.1, D_h=0.1):
+        """
+        Initializes the metabolite fields and diffusion parameters.
+        """
         self.width = width
         self.height = height
         self.D_c = D_c
@@ -22,6 +32,9 @@ class Microenvironment:
 
     # Enforce boundary conditions: edges maintain user-specified concentrations
     def enforce_boundary_conditions(self):
+        """
+        Resets boundary grid cells to background values.
+        """
         self.oxygen[0, :] = self.oxygen[-1, :] = self.oxygen_bg
         self.oxygen[:, 0] = self.oxygen[:, -1] = self.oxygen_bg
         
@@ -33,6 +46,9 @@ class Microenvironment:
 
     # Compute 2D discrete finite difference Laplacian
     def _laplacian_2d(self, matrix):
+        """
+        Computes the Laplacian of a 2D matrix using central differences.
+        """
         laplacian = np.zeros_like(matrix)
         laplacian[1:-1, 1:-1] = (
             matrix[2:, 1:-1] + matrix[:-2, 1:-1] +
@@ -43,6 +59,9 @@ class Microenvironment:
 
     # Diffuse resources using numerical substepping
     def diffuse(self, dt=1.0):
+        """
+        Simulates diffusion over a time step dt using sub-stepping.
+        """
         n_substeps = 4
         dt_sub = dt / n_substeps
         for _ in range(n_substeps):
@@ -58,6 +77,9 @@ class Microenvironment:
 
     # Decrease metabolites at specific grid cell upon consumption
     def consume_metabolites(self, x, y, o2_consumed, glu_consumed, h_produced):
+        """
+        Updates local metabolite levels at (x, y).
+        """
         self.oxygen[x, y] -= o2_consumed
         self.glucose[x, y] -= glu_consumed
         self.h_ions[x, y] += h_produced
