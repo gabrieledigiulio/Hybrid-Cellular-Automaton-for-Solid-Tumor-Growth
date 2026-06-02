@@ -6,8 +6,25 @@ from mesa import Agent
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 class TumorCell(Agent):
+    """
+    Agent representing a single tumor cell with a neural genome.
+    
+    Attributes:
+        w, W: Neural network weight matrices.
+        theta, phi: Neural network threshold vectors.
+        state: Current life cycle state (PROLIFERATING, QUIESCENT, APOPTOTIC, NECROTIC).
+        age: Normalized age of the cell.
+        proliferation_age: Age threshold for cell division.
+    """
     # Mesa 3.0: unique_id was removed from agent parameters
     def __init__(self, model, parent_weights=None):
+        """
+        Initialize a tumor cell.
+        
+        Args:
+            model: The simulation model.
+            parent_weights: Optional tuple of (w, W, theta, phi) for inheritance.
+        """
         super().__init__(model)
         
         # --- 1. GENETIC INHERITANCE AND MUTATION ---
@@ -26,6 +43,12 @@ class TumorCell(Agent):
 
     # Initialize base phenotype weights and thresholds
     def init_base_phenotype(self):
+        """
+        Initializes the default neural network weights and thresholds.
+        
+        Returns:
+            Tuple of (w, W, theta, phi) arrays.
+        """
         w = np.array([
             [1.0,  0.0,  0.0,  0.0],
             [0.5,  0.0,  0.0,  0.0],
@@ -46,6 +69,15 @@ class TumorCell(Agent):
 
     # Mutate weights and thresholds based on mutation probability and standard deviation
     def mutate(self, p_w, p_W, p_theta, p_phi):
+        """
+        Creates mutated copies of the genetic arrays.
+        
+        Args:
+            p_w, p_W, p_theta, p_phi: Parent genetic arrays.
+            
+        Returns:
+            Tuple of mutated (w, W, theta, phi) arrays.
+        """
         # Read dynamic parameters set in the current model
         prob = self.model.mutation_prob
         sigma = self.model.mutation_std
@@ -59,6 +91,17 @@ class TumorCell(Agent):
 
     # Apply Poisson-distributed random mutation to an array
     def _mutate_array(self, arr, prob, sigma):
+        """
+        Applies point mutations to an array based on standard deviation.
+        
+        Args:
+            arr: Input numpy array.
+            prob: Probability of mutation per element.
+            sigma: Standard deviation of mutation noise.
+            
+        Returns:
+            A mutated copy of the array.
+        """
         n = arr.size
         n_mutations = np.random.poisson(prob * n)
         if n_mutations > 0:
@@ -70,16 +113,32 @@ class TumorCell(Agent):
 
     # Sigmoid activation function
     def _sigmoid(self, x):
+        """
+        Standard sigmoid activation function.
+        """
         return 1.0 / (1.0 + np.exp(-2.0 * x))
 
     # Feed-forward response based on neural genome
     def calculate_response(self, inputs):
+        """
+        Computes the cell's response (outputs) for a given set of environmental inputs.
+        
+        Args:
+            inputs: Array of normalized environmental conditions [local_density, O2, Glucose, H+].
+            
+        Returns:
+            Output vector representing behavior probabilities/intensities.
+        """
         V = self._sigmoid(np.dot(self.w, inputs) - self.theta)
         O = self._sigmoid(np.dot(self.W, V) - self.phi)
         return O
 
     # Execute agent's decision step in the simulation cycle
     def step(self):
+        """
+        The cell's main behavior loop per simulation step.
+        Evaluates environment, updates state, consumes resources, and potentially divides.
+        """
         if self.state in ["APOPTOTIC", "NECROTIC"]:
             return
             
@@ -119,6 +178,15 @@ class TumorCell(Agent):
 
     # Unique genetic signature of the cell based on rounded weights and thresholds
     def _compute_signature(self, decimals=3):
+        """
+        Computes a hashable genetic signature for diversity analysis.
+        
+        Args:
+            decimals: Precision for rounding weights.
+            
+        Returns:
+            Tuple representing the phenotype signature.
+        """
         w_f = np.round(self.w, decimals=decimals).flatten()
         W_f = np.round(self.W, decimals=decimals).flatten()
         t_f = np.round(self.theta, decimals=decimals).flatten()
