@@ -15,13 +15,27 @@ import config
 
 # Count aerobic cells (metabolic output index 3 <= 0.5)
 def count_aerobic(m):
+    """
+    Model reporter to count cells in aerobic metabolic state.
+    """
     return sum(1 for a in m.agents if a.state in ["PROLIFERATING", "QUIESCENT"] and not (a.outputs is not None and len(a.outputs) > 3 and a.outputs[3] > 0.5))
 
 # Count anaerobic cells (metabolic output index 3 > 0.5)
 def count_anaerobic(m):
+    """
+    Model reporter to count cells in anaerobic metabolic state.
+    """
     return sum(1 for a in m.agents if a.state in ["PROLIFERATING", "QUIESCENT"] and (a.outputs is not None and len(a.outputs) > 3 and a.outputs[3] > 0.5))
 
 class TumorModel(Model):
+    """
+    Mesa Model representing the tumor growth in a 2D microenvironment.
+    
+    Attributes:
+        grid: SingleGrid instance for spatial management.
+        env: Microenvironment instance for diffusing substances.
+        datacollector: Mesa DataCollector for logging metrics.
+    """
     def __init__(self, width=config.WIDTH_2D, height=config.HEIGHT_2D, 
                  oxygen_bg=config.OXYGEN_BG,
                  glucose_bg=config.GLUCOSE_BG,
@@ -34,6 +48,9 @@ class TumorModel(Model):
                  D_h=config.D_H,
                  initial_cells=config.INITIAL_CELLS,
                  seed=config.SEED):
+        """
+        Initializes the tumor model with physical and biological parameters.
+        """
         super().__init__(seed=seed)
         if seed is not None:
             np.random.seed(seed)
@@ -92,11 +109,17 @@ class TumorModel(Model):
 
     # Instantiate and place a cell on the grid
     def create_cell(self, pos, parent_weights=None):
+        """
+        Creates a new TumorCell and places it on the grid.
+        """
         cell = TumorCell(self, parent_weights)
         self.grid.place_agent(cell, pos)
 
     # Handle mitotic division: select free neighbor cell or force quiescence
     def divide_cell(self, parent_cell):
+        """
+        Orchestrates cell division by finding an empty adjacent spot.
+        """
         neighborhood = self.grid.get_neighborhood(parent_cell.pos, moore=False, include_center=False)
         empty_spots = [pos for pos in neighborhood if self.grid.is_cell_empty(pos)]
         if empty_spots:
@@ -108,11 +131,17 @@ class TumorModel(Model):
 
     # Remove cell agent from scheduler and grid
     def remove_cell(self, cell):
+        """
+        Removes an agent from the simulation.
+        """
         self.grid.remove_agent(cell)
         cell.remove()
 
     # Calculate resource consumption and transition to Necrotic state if resources are below threshold
     def consume_resources(self, cell, f_factor):
+        """
+        Manages metabolite consumption from the environment based on cell metabolic state.
+        """
         x, y = cell.pos
 
         metabolic_output = 0.0
@@ -138,6 +167,9 @@ class TumorModel(Model):
 
     # Perform a model simulation step
     def step(self):
+        """
+        Advances the simulation by one time step.
+        """
         self.env.diffuse(dt=1.0)
         to_remove = [cell for cell in self.agents if cell.state == "APOPTOTIC"]
         for cell in to_remove:
@@ -154,6 +186,9 @@ class TumorModel(Model):
 
     # Calculate current maximum spatial distance of tumor cells from the center
     def invasive_distance(self):
+        """
+        Returns the maximum distance of any cell from the tumor center.
+        """
         if not self.agents:
             return 0.0
         cx, cy = self.center
@@ -164,6 +199,9 @@ class TumorModel(Model):
 
     # Calculate genetic diversity index using Shannon entropy
     def shannon_index(self):
+        """
+        Calculates the Shannon Diversity Index based on unique genetic signatures.
+        """
         if not self.agents:
             return 0.0
         counts = {}
