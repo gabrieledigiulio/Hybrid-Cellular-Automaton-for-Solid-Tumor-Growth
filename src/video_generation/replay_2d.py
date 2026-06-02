@@ -11,6 +11,10 @@ DEFAULT_REPLAY_PATH = os.path.join(ROOT_DIR, "results", "2d", "2D_Normoxia", "da
 
 
 def main():
+    """
+    Main execution logic for replaying 2D simulation data.
+    Loads .npz files and generates an animation or video file.
+    """
     parser = argparse.ArgumentParser(description="Replay 2D simulation from .npz")
     parser.add_argument(
         "path",
@@ -44,6 +48,9 @@ def main():
     ax.axis("off")
 
     def update(frame_idx):
+        """
+        Animation update function for Matplotlib FuncAnimation.
+        """
         im.set_data(cells[frame_idx].T)
         ax.set_title(f"Step {steps[frame_idx]}")
         return (im,)
@@ -54,6 +61,7 @@ def main():
     os.makedirs(videos_dir, exist_ok=True)
     base_name = os.path.splitext(os.path.basename(args.path))[0]
 
+    # Save FIRST, then show — avoids blocking when called from run_all.py
     fps = max(1, int(1000 / max(args.interval, 1)))
     if shutil.which("ffmpeg"):
         out_path = os.path.join(videos_dir, f"{base_name}.mp4")
