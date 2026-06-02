@@ -8,7 +8,20 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # Represents a single 3D tumor cell agent with a neural genome
 class TumorCell3D(Agent):
+    """
+    Agent representing a single tumor cell in 3D space with a neural genome.
+    
+    Attributes:
+        w, W: Neural network weight matrices.
+        theta, phi: Neural network threshold vectors.
+        state: Current life cycle state (PROLIFERATING, QUIESCENT, APOPTOTIC, NECROTIC).
+        age: Normalized age of the cell.
+        proliferation_age: Age threshold for cell division.
+    """
     def __init__(self, model, parent_weights=None):
+        """
+        Initializes a 3D tumor cell.
+        """
         super().__init__(model)
 
         # Genetic inheritance or base initialization
@@ -27,6 +40,9 @@ class TumorCell3D(Agent):
 
     # Initialize base phenotype weights and thresholds
     def init_base_phenotype(self):
+        """
+        Initializes default neural genome weights and thresholds for 3D cells.
+        """
         w = np.array([
             [1.0,  0.0,  0.0,  0.0],
             [0.5,  0.0,  0.0,  0.0],
@@ -47,6 +63,9 @@ class TumorCell3D(Agent):
 
     # Mutate neural weights and thresholds based on model mutation probability
     def mutate(self, p_w, p_W, p_theta, p_phi):
+        """
+        Generates mutated genetic arrays from parent genetics.
+        """
         prob = self.model.mutation_prob
         sigma = self.model.mutation_std
 
@@ -59,6 +78,9 @@ class TumorCell3D(Agent):
 
     # Helper function to mutate array with Poisson-distributed mutations
     def _mutate_array(self, arr, prob, sigma):
+        """
+        Applies point mutations to a 3D genetic array.
+        """
         n = arr.size
         n_mutations = np.random.poisson(prob * n)
         if n_mutations > 0:
@@ -70,16 +92,25 @@ class TumorCell3D(Agent):
 
     # Sigmoid activation function
     def _sigmoid(self, x):
+        """
+        Sigmoid activation function.
+        """
         return 1.0 / (1.0 + np.exp(-2.0 * x))
 
     # Feed-forward response based on neural network weights
     def calculate_response(self, inputs):
+        """
+        Calculates the cell response vector from environmental inputs in 3D.
+        """
         V = self._sigmoid(np.dot(self.w, inputs) - self.theta)
         O = self._sigmoid(np.dot(self.W, V) - self.phi)
         return O
 
     # Cell behavioral step based on environmental inputs (Von Neumann 6-neighbors)
     def step(self):
+        """
+        Decision step for the 3D tumor cell.
+        """
         if self.state in ["APOPTOTIC", "NECROTIC"]:
             return
 
@@ -115,6 +146,9 @@ class TumorCell3D(Agent):
 
     # Unique genetic signature identifier for the cell
     def _compute_signature(self, decimals=3):
+        """
+        Generates a unique signature for gene diversity tracking in 3D.
+        """
         w_f = np.round(self.w, decimals=decimals).flatten()
         W_f = np.round(self.W, decimals=decimals).flatten()
         t_f = np.round(self.theta, decimals=decimals).flatten()

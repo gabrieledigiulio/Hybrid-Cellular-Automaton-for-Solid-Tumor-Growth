@@ -14,13 +14,27 @@ from agent_3d import TumorCell3D
 
 # Count 3D aerobic cells (metabolic output index 3 <= 0.5)
 def count_aerobic_3d(m):
+    """
+    Model reporter to count 3D cells in aerobic metabolic state.
+    """
     return sum(1 for a in m.agents if a.state in ["PROLIFERATING", "QUIESCENT"] and not (a.outputs is not None and len(a.outputs) > 3 and a.outputs[3] > 0.5))
 
 # Count 3D anaerobic cells (metabolic output index 3 > 0.5)
 def count_anaerobic_3d(m):
+    """
+    Model reporter to count 3D cells in anaerobic metabolic state.
+    """
     return sum(1 for a in m.agents if a.state in ["PROLIFERATING", "QUIESCENT"] and (a.outputs is not None and len(a.outputs) > 3 and a.outputs[3] > 0.5))
 
 class TumorModel3D(Model):
+    """
+    Mesa Model representing the tumor growth in a 3D microenvironment.
+    
+    Attributes:
+        grid: SingleGrid3D instance for 3D spatial management.
+        env: Microenvironment3D instance for diffusing substances in 3D.
+        datacollector: Mesa DataCollector for logging metrics.
+    """
     def __init__(self, width=config.WIDTH_3D, height=config.HEIGHT_3D, depth=config.DEPTH_3D,
                  oxygen_bg=config.OXYGEN_BG, glucose_bg=config.GLUCOSE_BG,
                  h_ions_bg=config.H_IONS_BG, mutation_prob=config.MUTATION_PROB,
@@ -29,6 +43,9 @@ class TumorModel3D(Model):
                  D_c=config.D_C, D_g=config.D_G, D_h=config.D_H,
                  initial_cells=config.INITIAL_CELLS,
                  seed=config.SEED):
+        """
+        Initializes the 3D tumor model with physical and biological parameters.
+        """
         super().__init__(seed=seed)
         if seed is not None:
             np.random.seed(seed)
@@ -93,11 +110,17 @@ class TumorModel3D(Model):
 
     # Instantiate and place a cell on the 3D grid
     def create_cell(self, pos, parent_weights=None):
+        """
+        Creates a new TumorCell3D and places it on the 3D grid.
+        """
         cell = TumorCell3D(self, parent_weights)
         self.grid.place_agent(cell, pos)
 
     # Handle mitotic division: select free neighbor cell or force quiescence
     def divide_cell(self, parent_cell):
+        """
+        Orchestrates cell division in 3D by finding an empty adjacent spot.
+        """
         neighborhood = self.grid.get_neighborhood(parent_cell.pos, moore=False, include_center=False)
         empty_spots = [pos for pos in neighborhood if self.grid.is_cell_empty(pos)]
         if empty_spots:
@@ -109,10 +132,16 @@ class TumorModel3D(Model):
 
     # Remove cell agent from scheduler and grid
     def remove_cell(self, cell):
+        """
+        Removes an agent from the 3D simulation.
+        """
         self.grid.remove_agent(cell)
         cell.remove()
 
     def consume_resources(self, cell, f_factor):
+        """
+        Manages metabolite consumption in the 3D environment.
+        """
         x, y, z = cell.pos
         metabolic_output = 0.0
         if cell.outputs is not None and len(cell.outputs) > 3:
@@ -140,6 +169,9 @@ class TumorModel3D(Model):
 
     # Perform a model simulation step in 3D
     def step(self):
+        """
+        Advances the 3D simulation by one time step.
+        """
         self.env.diffuse(dt=1.0)
         to_remove = [cell for cell in self.agents if cell.state == "APOPTOTIC"]
         for cell in to_remove:
@@ -157,6 +189,9 @@ class TumorModel3D(Model):
 
     # Calculate current maximum spatial distance of tumor cells from the center in 3D
     def invasive_distance(self):
+        """
+        Returns the maximum spatial distance of any cell from the 3D center.
+        """
         if not self.agents:
             return 0.0
         cx, cy, cz = self.center
@@ -168,6 +203,9 @@ class TumorModel3D(Model):
 
     # Calculate genetic diversity index using Shannon entropy in 3D
     def shannon_index(self):
+        """
+        Calculates the Shannon Diversity Index in 3D based on genetic signatures.
+        """
         if not self.agents:
             return 0.0
         counts = {}

@@ -39,6 +39,9 @@ aerobic_hist = solara.reactive([])
 anaerobic_hist = solara.reactive([])
 
 def _make_model():
+    """
+    Instantiates a new TumorModel3D based on currently selected reactive parameters.
+    """
     depth = config.DEPTH_3D
     return TumorModel3D(
         width=config.WIDTH_3D,
@@ -58,6 +61,9 @@ model = _make_model()
 
 
 def do_step():
+    """
+    Advances the 3D model by one step and updates the UI reactive variables.
+    """
     global model
     global step_count
     model.step()
@@ -77,6 +83,9 @@ def do_step():
 
 
 def reset_model():
+    """
+    Re-initializes the simulation model and clears history metrics.
+    """
     global model
     global step_count
     model = _make_model()
@@ -95,6 +104,9 @@ def reset_model():
 
 
 def build_figure():
+    """
+    Constructs a 3D Plotly Scatter Plot representing the current cell grid.
+    """
     xs, ys, zs, colors = [], [], [], []
     for cell in list(model.agents):
         if cell.state == "APOPTOTIC":

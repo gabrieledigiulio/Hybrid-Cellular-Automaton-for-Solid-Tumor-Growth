@@ -5,7 +5,13 @@ import numpy as np
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 # Simple 3D grid class to manage single occupancy of voxels by agent cells
 class SingleGrid3D:
+    """
+    Minimal 3D grid implementation for Mesa-like agent placement.
+    """
     def __init__(self, width, height, depth):
+        """
+        Initializes the 3D grid with specific dimensions.
+        """
         self.width = width
         self.height = height
         self.depth = depth
@@ -13,12 +19,18 @@ class SingleGrid3D:
 
     # Place an agent at a specific coordinate
     def place_agent(self, agent, pos):
+        """
+        Assigns an agent to a specific (x, y, z) voxel.
+        """
         x, y, z = pos
         self.grid[x, y, z] = agent
         agent.pos = pos
 
     # Remove an agent from the grid
     def remove_agent(self, agent):
+        """
+        Clears an agent from its current voxel.
+        """
         if agent.pos is None:
             return
         x, y, z = agent.pos
@@ -27,11 +39,17 @@ class SingleGrid3D:
 
     # Check if a voxel is unoccupied
     def is_cell_empty(self, pos):
+        """
+        Returns True if the voxel at pos is empty.
+        """
         x, y, z = pos
         return self.grid[x, y, z] is None
 
     # Find coordinate neighbors using Moore (26-neighbors) or Von Neumann (6-neighbors)
     def get_neighborhood(self, pos, moore=False, include_center=False):
+        """
+        Returns a list of adjacent coordinates in 3D.
+        """
         x, y, z = pos
         neighbors = []
         if moore:

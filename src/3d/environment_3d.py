@@ -7,7 +7,17 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 # 3D physical environment tracking metabolite concentrations and PDE diffusion
 class Microenvironment3D:
+    """
+    Manages the physical microenvironment in 3D.
+    
+    Attributes:
+        oxygen, glucose, h_ions: 3D numpy arrays representing concentrations.
+        D_c, D_g, D_h: 3D diffusion coefficients.
+    """
     def __init__(self, width, height, depth, oxygen_bg=1.0, glucose_bg=1.0, h_ions_bg=0.0, D_c=0.1, D_g=0.1, D_h=0.1):
+        """
+        Initializes the 3D metabolite fields and diffusion parameters.
+        """
         self.width = width
         self.height = height
         self.depth = depth
@@ -24,6 +34,9 @@ class Microenvironment3D:
 
     # Enforce boundary conditions: boundary voxels maintain arterial concentrations
     def enforce_boundary_conditions(self):
+        """
+        Resets 3D boundary voxels to background values.
+        """
         self.oxygen[0, :, :] = self.oxygen[-1, :, :] = self.oxygen_bg
         self.oxygen[:, 0, :] = self.oxygen[:, -1, :] = self.oxygen_bg
         self.oxygen[:, :, 0] = self.oxygen[:, :, -1] = self.oxygen_bg
@@ -38,6 +51,9 @@ class Microenvironment3D:
 
     # Compute 3D discrete finite difference Laplacian
     def _laplacian_3d(self, matrix):
+        """
+        Computes the Laplacian of a 3D matrix using central differences.
+        """
         laplacian = np.zeros_like(matrix)
         laplacian[1:-1, 1:-1, 1:-1] = (
             matrix[2:, 1:-1, 1:-1] + matrix[:-2, 1:-1, 1:-1] +
@@ -49,6 +65,9 @@ class Microenvironment3D:
 
     # Diffuse resources using numerical substepping
     def diffuse(self, dt=1.0):
+        """
+        Simulates 3D diffusion over a time step dt using sub-stepping.
+        """
         n_substeps = 4
         dt_sub = dt / n_substeps
         for _ in range(n_substeps):
@@ -64,6 +83,9 @@ class Microenvironment3D:
 
     # Decrease metabolites at specific voxel upon consumption
     def consume_metabolites(self, x, y, z, o2_consumed, glu_consumed, h_produced):
+        """
+        Updates local 3D metabolite levels at (x, y, z).
+        """
         self.oxygen[x, y, z] -= o2_consumed
         self.glucose[x, y, z] -= glu_consumed
         self.h_ions[x, y, z] += h_produced
