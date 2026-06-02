@@ -54,7 +54,6 @@ def main():
     os.makedirs(videos_dir, exist_ok=True)
     base_name = os.path.splitext(os.path.basename(args.path))[0]
 
-    # Save FIRST, then show — avoids blocking when called from run_all.py
     fps = max(1, int(1000 / max(args.interval, 1)))
     if shutil.which("ffmpeg"):
         out_path = os.path.join(videos_dir, f"{base_name}.mp4")
