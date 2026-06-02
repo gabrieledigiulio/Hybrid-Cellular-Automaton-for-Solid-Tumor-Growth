@@ -109,7 +109,7 @@ project/
 ### Install dependencies
 
 ```bash
-pip install mesa mesa-viz-tornado solara numpy pandas matplotlib plotly kaleido imageio imageio-ffmpeg networkx
+pip install mesa mesa-viz-tornado solara numpy pandas matplotlib plotly kaleido imageio imageio-ffmpeg networkx anywidget
 ```
 
 ---
